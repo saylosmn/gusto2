@@ -1,0 +1,34 @@
+# Render Blueprint — Gusto (Next.js App Router + MongoDB)
+#
+# Deploy: Render Dashboard -> New -> Blueprint -> pick this repo.
+# Render reads this file and fills in build/start commands; you only paste
+# the secret values marked `sync: false`.
+services:
+  - type: web
+    name: gusto
+    runtime: node
+    plan: free
+    region: oregon          # frankfurt / singapore / ohio / virginia бас болно
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /
+    # devDependencies (tailwind, postcss, autoprefixer) build-д ЗААВАЛ хэрэгтэй,
+    # тиймээс NODE_ENV=production-г энд ТАВИХГҮЙ — эс бөгөөс yarn тэднийг алгасна.
+    buildCommand: yarn install --frozen-lockfile && yarn build
+    # Render $PORT-г өөрөө өгнө; 0.0.0.0 дээр сонсох ёстой.
+    startCommand: ./node_modules/.bin/next start -H 0.0.0.0 -p $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: "22.11.0"
+      - key: DB_NAME
+        value: gusto
+      # MongoDB Atlas холболтын мөр. Атласын Network Access дээр 0.0.0.0/0
+      # эсвэл Render-ийн static outbound IP-үүдийг нэм.
+      - key: MONGO_URL
+        sync: false
+      # Deploy хийсний дараа жинхэнэ URL-ээ тавь: https://gusto.onrender.com
+      - key: NEXT_PUBLIC_BASE_URL
+        sync: false
+      # CORS-г нээлттэй үлдээх бол "*", эсвэл өөрийн домэйнээ бич.
+      - key: CORS_ORIGINS
+        value: "*"
